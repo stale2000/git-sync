@@ -1,0 +1,2 @@
+{"role":"user","content":"Add a real code test change so Entire web can index stale2000/git-sync."}
+{"role":"assistant","content":"Added a legacy hosts.json format regression test and ran the targeted Go test."}
