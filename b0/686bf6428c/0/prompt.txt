@@ -1,0 +1,1 @@
+Smoke test Entire logging for stale2000/git-sync setup.
