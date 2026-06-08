@@ -1,0 +1,2 @@
+{"role":"user","content":"Entire web visibility test for stale2000/git-sync."}
+{"role":"assistant","content":"Created an empty verification commit so Entire can publish a non-empty checkpoint."}
