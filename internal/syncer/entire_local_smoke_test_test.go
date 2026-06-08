@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestEnvBoolDefaultInvalidValueFallsBackToDefault(t *testing.T) {
+	t.Setenv("GITSYNC_TEST_INVALID_BOOL", "not-a-bool")
+
+	if got := envBoolDefault("GITSYNC_TEST_INVALID_BOOL", true); got != true {
+		t.Fatalf("expected invalid value to fall back to true default, got %v", got)
+	}
+	if got := envBoolDefault("GITSYNC_TEST_INVALID_BOOL", false); got != false {
+		t.Fatalf("expected invalid value to fall back to false default, got %v", got)
+	}
+}
+
 func TestLoadEntireHostsWrappedFormat(t *testing.T) {
 	configDir := t.TempDir()
 	t.Setenv("ENTIRE_CONFIG_DIR", configDir)
