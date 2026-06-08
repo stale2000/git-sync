@@ -34,3 +34,29 @@ func TestLoadEntireHostsWrappedFormat(t *testing.T) {
 		t.Fatalf("unexpected active user: %+v", hosts["127.0.0.1:8080"])
 	}
 }
+
+func TestLoadEntireHostsLegacyMapFormat(t *testing.T) {
+	configDir := t.TempDir()
+	t.Setenv("ENTIRE_CONFIG_DIR", configDir)
+
+	data := []byte(`{
+  "entire.io": {
+    "activeUser": "bryan",
+    "users": ["bryan"]
+  }
+}`)
+	if err := os.WriteFile(filepath.Join(configDir, "hosts.json"), data, 0o600); err != nil {
+		t.Fatalf("write hosts.json: %v", err)
+	}
+
+	hosts, activeHost, err := loadEntireHosts()
+	if err != nil {
+		t.Fatalf("load hosts: %v", err)
+	}
+	if activeHost != "" {
+		t.Fatalf("unexpected active host: %q", activeHost)
+	}
+	if hosts["entire.io"].ActiveUser != "bryan" {
+		t.Fatalf("unexpected active user: %+v", hosts["entire.io"])
+	}
+}
