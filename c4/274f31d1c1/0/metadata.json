@@ -14,5 +14,59 @@
     "cache_read_tokens": 15243264,
     "output_tokens": 41810,
     "api_call_count": 112
+  },
+  "summary": {
+    "intent": "The user wanted to create and push a copy of the repo to their GitHub account, configure Entire.io/Codex logging for it, and verify that session/checkpoint data appears on the Entire web UI for the new repo.",
+    "outcome": "The repo was created and pushed as stale2000/git-sync, Entire/Codex hooks were installed and trusted, multiple checkpoints were created and pushed to the entire/checkpoints/v1 branch, and a real Codex CLI session was captured. The Entire web UI still did not list checkpoints despite authenticated browser access and verified raw checkpoint files on GitHub.",
+    "learnings": {
+      "repo": [
+        "Target repo was corrected from stale2000/cli to stale2000/git-sync because the repo name should match the project.",
+        "Entire stores checkpoint data in the Git branch entire/checkpoints/v1, not through a separate 'entire push' command.",
+        "The placeholder checkpoint remote github:org/checkpoints-repo is only a docs example and breaks expected same-repo checkpoint behavior if configured literally.",
+        "Entire's pre-push hook may push entire/checkpoints/v1 automatically, creating apparent ref-lock/race messages when an explicit push follows.",
+        "Installing Codex hooks mid-session may not capture the already-running session's SessionStart event; a new Codex process is cleaner for verification."
+      ],
+      "code": [
+        {
+          "path": "internal/syncer/entire_local_smoke_test_test.go",
+          "finding": "Added regression coverage for legacy hosts.json direct map format accepted by the Entire local smoke helper."
+        },
+        {
+          "path": "internal/syncer/entire_local_smoke_test_test.go",
+          "finding": "Added a focused test proving envBoolDefault falls back to the provided default on invalid boolean environment values."
+        },
+        {
+          "path": ".codex/hooks.json",
+          "finding": "Entire Codex hooks were installed for SessionStart, UserPromptSubmit, PostToolUse, and Stop events."
+        },
+        {
+          "path": ".entire/settings.json",
+          "finding": "Normal same-repo Entire settings should remain just enabled/telemetry without checkpoint_remote unless intentionally pushing checkpoints to a separate GitHub repo."
+        }
+      ],
+      "workflow": [
+        "Normal Entire publishing flow is git commit followed by git push; prepare-commit-msg adds Entire-Checkpoint trailers and pre-push publishes entire/checkpoints/v1.",
+        "Synthetic hook calls can produce weak or empty checkpoints if transcript ordering is wrong; real codex exec better validates Codex agent integration.",
+        "entire session attach <session-id> --agent codex --force can directly attach a session to the current HEAD checkpoint.",
+        "CLI auth, browser auth, and web/search indexing are separate surfaces; CLI success does not prove the web UI is authenticated or indexed."
+      ]
+    },
+    "friction": [
+      "Initial repo target was ambiguous: user first referenced stale2000/cli, then corrected to a new repo name.",
+      "mise trust warning appeared before local commands could run cleanly.",
+      "Codex hook trust had to be computed and added manually to ~/.codex/config.toml.",
+      "Synthetic smoke checkpoint initially had empty prompt/transcript data, so it was likely ignored by the web UI.",
+      "Commit messages created through shell quoting accidentally contained literal \\n sequences and needed amend passes.",
+      "Explicit checkpoint pushes sometimes raced with Entire's pre-push helper, producing ref-lock/non-fast-forward style confusion even when the helper had already pushed.",
+      "In-app browser was initially unauthenticated to Entire web despite CLI auth being valid.",
+      "Entire web/search continued showing no checkpoints even after raw checkpoint files were verified on GitHub and browser auth was confirmed.",
+      "User accidentally configured checkpoint_remote to the placeholder github:org/checkpoints-repo, which had to be removed."
+    ],
+    "open_items": [
+      "Investigate why Entire web/search does not discover or display checkpoints from stale2000/git-sync despite the pushed entire/checkpoints/v1 branch.",
+      "Attach the full desktop chat transcript explicitly using an empty commit plus entire session attach if the user wants this investigation preserved as a checkpoint.",
+      "Run the full go test ./... suite; only targeted internal/syncer tests were run during the session.",
+      "Confirm with Entire service maintainers or logs whether new repo checkpoint indexing requires a separate backend ingestion delay or repository registration step."
+    ]
   }
 }
