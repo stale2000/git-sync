@@ -1,1 +1,0 @@
-Make one tiny real test-only change: in internal/syncer/entire_local_smoke_test_test.go add a focused unit test for envBoolDefault proving an invalid env value falls back to the provided default. Keep the diff minimal and do not commit.
